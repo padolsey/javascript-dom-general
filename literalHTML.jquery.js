@@ -7,10 +7,10 @@
  *   e.g.
  *      var myDiv = |<div id="something"><strong>Boo!</strong></div>|;
  *
- * The pipe ('|') is the delimiter, you must escape (\) all pipes
+ * The pipe ('|') is the delimiter, you must escape (\|) all pipes
  * existing within the enclosed HTML.
  *
- * jQuery is required.
+ * **** jQuery is required ****
  *
  * Scripts using this feature must be of the type, "text/javascript:literalHTML"
  *   e.g.
@@ -29,6 +29,8 @@
  *      <script>
  *      
  * Note: the script below must go in a SCRIPT tag of the regular type.
+ * Bonus: You can embed programmatic values within {...}, e.g.
+ *     var id = 'something'; var html = |<div id="{id}"/>|;
  */
 
 jQuery(function($){
@@ -36,15 +38,13 @@ jQuery(function($){
     function parse(script) {
         var htmlPatt = /\|\s*(<\w+(?:\\\||.)+?)\|/g;
         return script.replace(/(\n|\r\n)/g,'').replace(htmlPatt, function($0, $1) {
-            return 'jQuery("' + $1
-                        .replace(/"/g,'\\"')
-                        .replace(/\{(.+?)\}/, '"+$1+"')
-                    + '")[0]';
+            return 'jQuery("' + $1.replace(/"/g,'\\"').replace(/\{(.+?)\}/, '"+$1+"') + '")[0]';
         });
     }
     
     $('script[type$=":literalHTML"]').each(function(){
-        var src = $(this).attr('src');
+        var src = $(this).attr('src'),
+            parsed;
         if (src) {
             $.ajax({
                 url : src, async : false,
@@ -53,7 +53,7 @@ jQuery(function($){
                 }
             });
         }
-        var parsed = parsed || parse($(this)[0].innerHTML);
+        parsed = parsed || parse( $(this)[0].innerHTML );
         $.globalEval(parsed);
     });
     
